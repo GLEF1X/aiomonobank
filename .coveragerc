@@ -1,0 +1,26 @@
+[pytest]
+
+[report]
+exclude_lines =
+    pragma: no cover
+    @abstractmethod
+    @abc.abstractmethod
+    type: ignore
+    raise NotImplementedError
+    def __repr__
+    def __str__
+    class .*\bProtocol\):
+    pass
+omit =
+    aiomonobank/ext/*
+    */site-packages/*
+    */tests/*
+    */.eggs/*
+    aiomonobank/utils/mypy_hacks.py
+    aiomonobank/utils/compat.py
+    aiomonobank/utils/payload.py
+    aiomonobank/qiwi/clients/wrapper.py
+    aiomonobank/utils/deprecated.py
+    aiomonobank/utils/date_conversion.py
+    aiomonobank/utils/synchronous.py
+    aiomonobank/core/cache
