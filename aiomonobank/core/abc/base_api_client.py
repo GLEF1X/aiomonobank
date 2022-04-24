@@ -30,10 +30,6 @@ _C = TypeVar("_C", bound=Type["APIClientMeta"])
 
 class APIClientMeta(abc.ABCMeta):
     """
-    This metaclass fixes issue connected with poor release
-    of aiomonobank 2.0.5 that breaks all down. It's a complicated workaround of building of request service
-    "on-flight" and allows users of API client to use custom factories of a request service.
-
     Due to limitations of aiohttp library that requires to create ClientSession only inside coroutine
     I have to write this metaclass to avoid additional viscous boilerplate code.
     """
