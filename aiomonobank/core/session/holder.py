@@ -3,7 +3,7 @@ from __future__ import annotations
 import abc
 from dataclasses import dataclass, field
 from types import TracebackType
-from typing import Any, Generic, Optional, Type, TypeVar, cast, Mapping, Dict, Set
+from typing import Any, Generic, Optional, Type, TypeVar, cast, Mapping, Dict
 
 import aiohttp
 from aiohttp import ClientResponse
@@ -22,7 +22,7 @@ class HTTPResponse:
     content_type: str
     kwargs: Dict[str, Any] = field(default_factory=dict)
 
-    def json(self) -> Dict[str, Any]:
+    def json(self) -> Any:
         return cast(Dict[str, Any], json.loads(self.body))
 
     def __getattr__(self, item: str) -> Any:
