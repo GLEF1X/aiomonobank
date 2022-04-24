@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 import abc
+import sys
+import traceback
+import warnings
 from dataclasses import dataclass, field
 from types import TracebackType
 from typing import Any, Generic, Optional, Type, TypeVar, cast, Mapping, Dict
@@ -9,6 +12,7 @@ import aiohttp
 from aiohttp import ClientResponse
 
 from aiomonobank.utils.compat import json
+from aiomonobank.utils.helpers import get_running_loop
 
 _SessionType = TypeVar("_SessionType", bound=Any)
 _SessionHolderType = TypeVar("_SessionHolderType", bound="AbstractSessionHolder[Any]")
@@ -72,8 +76,33 @@ class AbstractSessionHolder(abc.ABC, Generic[_SessionType]):
 
 
 class AiohttpSessionHolder(AbstractSessionHolder[aiohttp.ClientSession]):
+    _closed = None  # Serves as an uninitialized flag for __del__
+    _source_traceback = None  # type: Optional[traceback.StackSummary]
+
     def __init__(self, **kwargs: Any):
         AbstractSessionHolder.__init__(self, **kwargs)
+        self._loop = kwargs.get("loop") or get_running_loop()
+
+        if self._loop.get_debug():
+            self._source_traceback = traceback.extract_stack(sys._getframe(1))
+        self._closed = False
+
+    def __del__(self, _warnings=warnings):
+        if self._closed is False:
+            _warnings.warn(
+                f"Unclosed AiohttpSessionHolder {self!r}, probably you need to "
+                f"close your client after usage or use it as a context manager",
+                ResourceWarning,
+                source=self
+            )
+            context = {
+                'session_holder': self,
+                'message': f"Unclosed AiohttpSessionHolder {self!r}, probably you need to "
+                           f"close your client after usage or use it as a context manager"
+            }
+            if self._source_traceback is not None:
+                context['source_traceback'] = self._source_traceback
+            self._loop.call_exception_handler(context)
 
     async def close(self) -> None:
         if self._session_in_working_order():

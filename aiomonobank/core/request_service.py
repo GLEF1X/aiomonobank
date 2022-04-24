@@ -51,6 +51,8 @@ class RequestServiceProto(Protocol):
 
 
 class RequestService:
+
+
     def __init__(
             self,
             session_holder: Optional[AbstractSessionHolder[Any]] = None,
