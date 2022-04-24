@@ -11,8 +11,7 @@ from typing import (
     Set,
     cast,
     Union,
-    Type,
-    Tuple,
+    Tuple, no_type_check,
 )
 
 from pydantic import BaseModel, BaseConfig, Extra, parse_obj_as
@@ -23,7 +22,6 @@ from aiomonobank.core.session.holder import HTTPResponse
 from aiomonobank.utils.compat import json
 
 ReturningType = TypeVar("ReturningType")
-_T = TypeVar("_T")
 _sentinel = object()
 
 
@@ -66,7 +64,8 @@ class APIMethod(abc.ABC, GenericModel, Generic[ReturningType]):
     def http_method(self) -> str:
         pass
 
-    def __class_getitem__(cls, params: Union[Type[Any], Tuple[Type[Any], ...]]) -> Type[Any]:
+    @no_type_check
+    def __class_getitem__(cls, params):
         """
         Allows us to get generic class in runtime instead of do it explicitly
         in every class that inherits from APIMethod.
@@ -100,12 +99,14 @@ class APIMethod(abc.ABC, GenericModel, Generic[ReturningType]):
     def parse_http_response(cls, response: HTTPResponse) -> ReturningType:
         if cls.__returning_type__ is _sentinel or cls.__returning_type__ is ReturningType:  # type: ignore
             raise RuntimeError(f"{cls.__qualname__}: __returning_type__ is missing")
+        cls._validate_response(response)
+
+        try:
+            return cls.on_json_parse(response)
+        except TypeError:
+            pass
 
         json_response = response.json()
-
-        manually_parsed_json = cls.on_json_parse(response)
-        if manually_parsed_json is not _sentinel:
-            return manually_parsed_json
 
         try:
             if issubclass(cls.__returning_type__, BaseModel):
@@ -116,8 +117,13 @@ class APIMethod(abc.ABC, GenericModel, Generic[ReturningType]):
         return cast(ReturningType, parse_obj_as(cls.__returning_type__, json_response))
 
     @classmethod
+    @abc.abstractmethod
+    def _validate_response(cls, response: HTTPResponse) -> None:
+        pass
+
+    @classmethod
     def on_json_parse(cls, response: HTTPResponse) -> Union[Any, ReturningType]:
-        return _sentinel
+        raise TypeError(f"{cls.__module__}.{cls.__qualname__}: doesn't implement json parse hook.")
 
     def build_request(self, **url_format_kw: Any) -> "Request":
         request_kw: Dict[str, Any] = {
@@ -128,7 +134,7 @@ class APIMethod(abc.ABC, GenericModel, Generic[ReturningType]):
         if self.http_method == "GET" and self.json_payload_schema:
             raise TypeError(
                 "Request schema is not compatible with GET http method "
-                "since GET method cannot transfer_money json payload"
+                "since GET method cannot transfer json payload"
             )
 
         if self.http_method == "GET":
@@ -231,10 +237,10 @@ class RuntimeValue:
     __slots__ = ("_default", "_default_factory", "is_mandatory")
 
     def __init__(
-        self,
-        default: Optional[Any] = None,
-        default_factory: Optional[Callable[..., Any]] = None,
-        mandatory: bool = True,
+            self,
+            default: Optional[Any] = None,
+            default_factory: Optional[Callable[..., Any]] = None,
+            mandatory: bool = True,
     ):
         self._default = default
         self._default_factory = default_factory
@@ -251,7 +257,7 @@ class RuntimeValue:
 
 
 def _insert_value_into_dictionary(
-    d: Dict[str, _T], keychain: List[str], value: Any
+        d: Dict[str, Any], keychain: List[str], value: Any
 ) -> None:  # pragma: no cover
     if not keychain:
         return None
