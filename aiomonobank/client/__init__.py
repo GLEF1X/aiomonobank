@@ -36,7 +36,7 @@ class MonobankClient(BaseAPIClient):
             account: int = 0
     ) -> BankStatement:
         return await self._request_service.execute_api_method(
-            GetBankStatement(from_date=from_date, account=account)
+            GetBankStatement(from_date=from_date, account=account, to_date=to_date)
         )
 
     async def _create_request_service(self) -> RequestServiceProto:
