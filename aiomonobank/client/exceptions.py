@@ -1,6 +1,6 @@
-from http.client import TOO_MANY_REQUESTS, UNAUTHORIZED
 from json import JSONDecodeError
-from typing import ClassVar, Optional, Dict, Any, cast
+from json import JSONDecodeError
+from typing import Optional, Dict, Any, cast
 
 from aiomonobank.core.session.holder import HTTPResponse
 from aiomonobank.utils.compat import json
@@ -31,7 +31,7 @@ class MonobankAPIError(Exception):
 
         try:
             raw_response: str = json.dumps(deserialized_response, indent=4, ensure_ascii=False)  # type: ignore
-        except Exception:
+        except Exception:  # noqa
             raw_response = self.http_response.body.decode("utf-8")
 
         error_description = deserialized_response.get("errorDescription", "")
