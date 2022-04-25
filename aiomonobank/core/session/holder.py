@@ -108,6 +108,8 @@ class AiohttpSessionHolder(AbstractSessionHolder[aiohttp.ClientSession]):
         if self._session_in_working_order():
             await self._session.close()
 
+        self._closed = True
+
     async def convert_third_party_lib_response_to_http_response(
             self, response: ClientResponse
     ) -> HTTPResponse:
