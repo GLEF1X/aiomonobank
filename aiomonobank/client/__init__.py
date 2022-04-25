@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional, List, Dict, Any
+from typing import Optional, List
 
 from aiomonobank.client.methods.bank_statement import GetBankStatement
 from aiomonobank.client.methods.client_info import GetClientInfo
@@ -26,8 +26,11 @@ class MonobankClient(BaseAPIClient):
     async def get_exchange_rates(self) -> List[ExchangeRate]:
         return await self._request_service.execute_api_method(GetExchangeRates())
 
-    async def set_webhook(self, webhook_url: str) -> Dict[str, Any]:
-        return await self._request_service.execute_api_method(SetWebhook(webhook_url=webhook_url))
+    async def set_webhook(self, url: str) -> bool:
+        api_answer = await self._request_service.execute_api_method(
+            SetWebhook(webhook_url=url)  # type: ignore
+        )
+        return api_answer["status"] == "ok"
 
     async def get_bank_statement(
             self,
