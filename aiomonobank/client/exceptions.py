@@ -1,5 +1,4 @@
 from json import JSONDecodeError
-from json import JSONDecodeError
 from typing import Optional, Dict, Any, cast
 
 from aiomonobank.core.session.holder import HTTPResponse

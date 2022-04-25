@@ -27,6 +27,7 @@ except ImportError:
                 "functionality till you install this module."
             )
 
+
     aiofiles = aiofiles_compat()  # type: ignore
 
 try:
