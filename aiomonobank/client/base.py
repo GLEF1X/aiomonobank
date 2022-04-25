@@ -17,8 +17,9 @@ class MonobankAPIMethod(APIMethod[T], abc.ABC, Generic[T]):
 
     @classmethod
     def _validate_response(cls, response: HTTPResponse) -> None:
-        if isinstance(response.json(), list):
+        if not response.has_successful_status_code:
+            raise MonobankAPIError(response)
+        elif isinstance(response.json(), list):
             return None
-
-        if response.json().get("errorDescription") is not None:
+        elif response.json().get("errorDescription") is not None:
             raise MonobankAPIError(response)

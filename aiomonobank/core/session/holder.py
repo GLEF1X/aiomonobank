@@ -4,7 +4,7 @@ import abc
 import sys
 import traceback
 import warnings
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from types import TracebackType
 from typing import Any, Generic, Optional, Type, TypeVar, cast, Mapping, Dict
 
@@ -20,17 +20,29 @@ _SessionHolderType = TypeVar("_SessionHolderType", bound="AbstractSessionHolder[
 
 @dataclass
 class HTTPResponse:
+    """
+    Wrapper over different third-party HTTP client responses.
+    """
     status_code: int
     body: bytes
     headers: Mapping[str, Any]
     content_type: str
-    kwargs: Dict[str, Any] = field(default_factory=dict)
+    _real_response: Any
 
     def json(self) -> Any:
         return cast(Dict[str, Any], json.loads(self.body))
 
     def __getattr__(self, item: str) -> Any:
-        return self.kwargs[item]
+        return getattr(self.full_response, item)
+
+    @property
+    def has_successful_status_code(self) -> bool:
+        """Returns ``True`` if ``status`` is less than ``400``, ``False`` if not.
+
+        This is **not** a check for ``200 OK`` but a check that the response
+        status is under 400.
+        """
+        return 400 > self.status_code
 
 
 class AbstractSessionHolder(abc.ABC, Generic[_SessionType]):
@@ -118,6 +130,7 @@ class AiohttpSessionHolder(AbstractSessionHolder[aiohttp.ClientSession]):
             body=await response.read(),
             headers=response.headers,
             content_type=response.content_type,
+            _real_response=response
         )
 
     async def get_session(self) -> _SessionType:
