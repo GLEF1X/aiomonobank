@@ -63,3 +63,4 @@ def test_get_bank_statement_method(method_payload: Dict[str, Any], expected_requ
 def test_set_webhook_method(method_payload: Dict[str, Any], expected_request: Request):
     method = SetWebhook(**method_payload)
     assert method.build_request() == expected_request
+

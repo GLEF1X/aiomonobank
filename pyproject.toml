@@ -63,6 +63,7 @@ pymdown-extensions = { version = "^8.2", optional = true }
 markdown-include = { version = "^0.6", optional = true }
 sphinxemoji = { version = "*", optional = true }
 sphinx-notfound-page = { version = "*", optional = true }
+DateTime = "^4.4"
 
 
 

@@ -1,8 +1,6 @@
 import pytest
 
-from aiomonobank.types.bank_statement import BankStatement
-from aiomonobank.types.client_info import ClientInfo
-from aiomonobank.types.exchange_rate import ExchangeRate
+from aiomonobank.client import BankStatement, ClientInfo, ExchangeRate
 
 pytestmark = pytest.mark.anyio
 
