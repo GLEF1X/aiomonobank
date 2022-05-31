@@ -33,7 +33,7 @@ class HTTPResponse:
         return cast(Dict[str, Any], json.loads(self.body))
 
     def __getattr__(self, item: str) -> Any:
-        return getattr(self.full_response, item)
+        return getattr(self._real_response, item)
 
     @property
     def has_successful_status_code(self) -> bool:
