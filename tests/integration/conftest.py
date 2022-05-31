@@ -3,7 +3,7 @@ import os
 
 import pytest
 
-from aiomonobank.client import MonobankClient
+from aiomonobank.client import MonobankAPIClient
 
 pytestmark = pytest.mark.anyio
 
@@ -34,7 +34,7 @@ def api_token() -> str:
 
 
 @pytest.fixture(scope="session")
-async def monobank_client(api_token: str) -> MonobankClient:
-    client = MonobankClient(api_token)
+async def monobank_client(api_token: str) -> MonobankAPIClient:
+    client = MonobankAPIClient(api_token)
     yield client
     await client.close()

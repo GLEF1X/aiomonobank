@@ -1,3 +1,4 @@
+import functools
 from typing import Union
 
 from .currency import Currency
@@ -7,6 +8,7 @@ class UnknownCurrencyCodeError(Exception):
     pass
 
 
+@functools.lru_cache(maxsize=256)
 def parse_currency_by_code(currency_code: Union[str, int]) -> Currency:
     try:
         return described[codes_number[str(currency_code)]]
