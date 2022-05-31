@@ -19,15 +19,14 @@ class ExchangeRate(Base):
     rate_cross: Optional[float] = Field(None, alias="rateCross")
 
     def __eq__(self, other: Any) -> bool:
-        if not isinstance(other, ExchangeRate):
-            return False
-
         return (
+            (
                 self.currency_code_a == other.currency_code_a
-                and
-                self.currency_code_b == self.currency_code_b
-                and
-                self.unix_date == other.unix_date
+                and self.currency_code_b == self.currency_code_b
+                and self.unix_date == other.unix_date
+            )
+            if isinstance(other, ExchangeRate)
+            else False
         )
 
     def __hash__(self) -> int:

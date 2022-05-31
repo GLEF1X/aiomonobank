@@ -63,10 +63,7 @@ class GetBankStatement(MonobankAPIMethod[BankStatement]):
 
     @validator("to_date", always=True)
     def validate_to_date(cls, to_date: Optional[datetime]) -> Optional[float]:
-        if to_date is None:
-            return None
-
-        return convert_to_unix_time(to_date)
+        return None if to_date is None else convert_to_unix_time(to_date)
 
     def build_request(self, **url_format_kw: Any) -> "Request":
         request = super().build_request(**url_format_kw)
